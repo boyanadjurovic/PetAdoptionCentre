@@ -1,5 +1,9 @@
 import java.util.Scanner;
 import java.sql.*;
+import java.sql.DriverManager;
+import java.sql.Connection;
+import java.sql.SQLException;
+
 public class Application {
 
     private static Connection aConnection = null;
@@ -193,11 +197,17 @@ public class Application {
 
     public static void main(String[] args) {
 
+        try {
+            DriverManager.registerDriver ( new org.postgresql.Driver() ) ;
+        } catch (Exception cnfe){
+            System.out.println("Class not found");
+        }
         try	{
             aConnection = DriverManager.getConnection("jdbc:postgresql://comp421.cs.mcgill.ca:5432/cs421", "cs421g31", "1234Group31");
             aStatement = aConnection.createStatement();
             promptWelcomeMenu();
             aConnection.close();
+            aStatement.close();
         }
         catch(Exception e) {
             System.err.println("Could not connect to database");
