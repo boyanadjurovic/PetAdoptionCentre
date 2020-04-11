@@ -18,20 +18,20 @@ public class Application {
      * Welcome menu prompt
      */
     private static void promptWelcomeMenu() {
-        System.out.println(" *** WELCOME TO THE PET ADOPTION CENTRE DATABASE *** \n\n");
+        System.out.println(" *** WELCOME TO THE PET ADOPTION CENTRE DATABASE ***");
         System.out.println("If you wish to exit the system, please press 0");
-        System.out.println("Are you an existing employee? (y/n) \n");
+        System.out.println("Are you an existing employee? (y/n)");
 
         String answer = aScanner.next();
         answer = answer.toLowerCase();
 
         if (answer.equals("0")) // todo someone please check if you can check for 0 like this when getting a String for answer
-            System.exit(0);
+            return;
 
-        while (!answer.equals("y") || !answer.equals("n") || !answer.equals("yes") || !answer.equals("no")){
-            System.out.println("Please enter a valid response (y/n");
+        /*while (!answer.equals("y") || !answer.equals("n") || !answer.equals("yes") || !answer.equals("no")){
+            System.out.println("Please enter a valid response (y/n)");
             answer = aScanner.next();
-        }
+        }*/
 
         if (answer.equals("y") || answer.equals("yes"))
             promptLogin();
@@ -55,7 +55,7 @@ public class Application {
             authLogin(eid, password);
         } catch (SQLException e) {
             System.err.println("Login: SQL Exception" + e.getMessage());
-            e.printStackTrace();
+            return;
         }
     }
 
@@ -101,56 +101,56 @@ public class Application {
      */
     private static void promptCreateAccount() {
         System.out.println("You may enter 0 to exit the system at any time");
-        System.out.println("Please enter your 4 digit employeeid");
+        System.out.println("Please enter your new 4 digit employeeid");
 
         int eid = aScanner.nextInt();
         int length = String.valueOf(eid).length();
-        while (length != 4 || eid != 0) {
+        /*while (length != 4 || eid != 0) {
             System.out.println("Please enter a valid 4 digit employeeid");
             eid = aScanner.nextInt();
             length = String.valueOf(eid).length();
-        }
+        }*/
         if (eid == 0)
-            System.exit(0);
+            return;
 
         System.out.println("Please enter your password");
         String password = aScanner.next();
         if (password.equals("0")) {
-            System.exit(0);
+            return;
         }
 
         System.out.println("Please enter your first and last name");
         String name = aScanner.next();
-        while (!name.contains(" ") || name.length() > 30 || !name.equals("0")) {
+        /*while (!name.contains(" ") || name.length() > 30 || !name.equals("0")) {
             System.out.println("Please enter BOTH a first and last name less than 30 characters total");
             name = aScanner.next();
-        }
+        }*/
         if (name.equals("0"))
-            System.exit(0);
+            return;
 
         System.out.println("Please enter your address");
         String address = aScanner.next();
         if (address.equals("0")) {
-            System.exit(0);
+            return;
         }
 
         System.out.println("Please enter your starting wage");
         int wage = aScanner.nextInt();
         length = String.valueOf(wage).length();
-        while (length < 2 || wage != 0) {
+        /*while (length < 2 || wage != 0) {
             System.out.println("Invalid wage. All employees are paid at least $10/hour. Please re-enter");
             wage = aScanner.nextInt();
             length = String.valueOf(wage).length();
-        }
+        }*/
         if (wage == 0) {
-            System.exit(0);
+            return;
         }
 
         try {
             authCreateAccount(eid, name, address, wage, password);
         } catch (SQLException e) {
             System.err.println("Create account: SQL Exception" + e.getMessage());
-            e.printStackTrace();
+            return;
         }
 
     }
