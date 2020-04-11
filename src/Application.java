@@ -194,13 +194,15 @@ public class Application {
     public static void main(String[] args) {
 
         try	{
-            aConnection = DriverManager.getConnection("jdbc:postgresql://localhost/CS421", "cs421g31", "1234Group31");
+            aConnection = DriverManager.getConnection("jdbc:postgresql://comp421.cs.mcgill.ca:5432/cs421", "cs421g31", "1234Group31");
             aStatement = aConnection.createStatement();
+            promptWelcomeMenu();
+            aConnection.close();
         }
-        catch(Exception e){
+        catch(Exception e) {
             System.err.println("Could not connect to database");
             System.exit(1); // 1 for error
         }
-        promptWelcomeMenu();
+
     }
 }
