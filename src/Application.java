@@ -54,7 +54,7 @@ public class Application {
         try {
             authLogin(eid, password);
         } catch (SQLException e) {
-            System.err.println("Login: SQL Exception" + e.getMessage());
+            System.err.println("Login: SQL Exception " + e.getMessage());
             return;
         }
     }
@@ -66,23 +66,26 @@ public class Application {
      * @throws SQLException
      */
     private static void authLogin(int pEID, String pPassword) throws SQLException {
-        aQuery = "SELECT eid FROM employee WHERE eid = " + pEID + " AND password = " + pPassword + ";";
+        aStatement = aConnection.createStatement();
+    	aQuery = "SELECT eid FROM employee WHERE eid = " + pEID + " AND password = '" + pPassword +"'" ;
         aOutput = aStatement.executeQuery(aQuery);
-
         if (aOutput.next()) {
-            aEID = aOutput.getInt(1);
-
-            aQuery = "SELECT name FROM employee WHERE eid = " + aEID + ";";
+            
+            aQuery = "SELECT name FROM employee WHERE eid = " + pEID ;
             aOutput = aStatement.executeQuery(aQuery);
-            String name = aOutput.getString(1);
-            System.out.println("\nWelcome " + name + "!");
+            
+            String name = aOutput.toString();
+            String name2 = aOutput.getString(1);
+            String name3 = aOutput.getString("name");
+            System.out.println(aOutput);
+            //System.out.println("\nWelcome " + name3 + "!");
             promptMainMenu();
         }
         else {
             System.err.println("\nInvalid login information. Press 1 to try again or 0 to exit the database application");
             int decision = aScanner.nextInt();
 
-            while (decision != 1 || decision != 0) {
+            while (decision != 1 && decision != 0) {
                 System.out.println("Please enter a valid response. Press 1 to try again or 0 to exit the database application");
                 decision = aScanner.nextInt();
             }
@@ -90,7 +93,8 @@ public class Application {
             if (decision == 1) {
                 promptLogin();
             }
-            else {
+            else if (decision ==0){
+            	System.out.println("exit successful");
                 System.exit(0);
             }
         }
@@ -149,7 +153,7 @@ public class Application {
         try {
             authCreateAccount(eid, name, address, wage, password);
         } catch (SQLException e) {
-            System.err.println("Create account: SQL Exception" + e.getMessage());
+            System.err.println("Create account: SQL Exception " + e.getMessage());
             return;
         }
 
@@ -164,34 +168,44 @@ public class Application {
      * @throws SQLException
      */
     private static void authCreateAccount(int pEID, String pName, String pAddress, int pWage, String pPassword) throws SQLException {
-        aQuery = "INSERT INTO employee VALUES (" + pEID + ", '" + pName + "', '" + pAddress + "', " + pWage + ", '" + pPassword + "');";
-        aOutput = aStatement.executeQuery(aQuery);
+        
+    	aQuery = "insert into employee (eid,name,address,wage,password) values ("+  pEID +",'"+ pName +"','" + pAddress+ "',"+pWage + ",'" + pPassword +"')";
 
-        if (aOutput.next()) {
-            System.out.println("Successfully created account.");
-        }
-        else {
-            System.err.println("\nCould not create account. Press 1 to try again or 0 to exit the database application");
-            int decision = aScanner.nextInt();
+        
+        aStatement.executeUpdate(aQuery, Statement.RETURN_GENERATED_KEYS);
+        aOutput = aStatement.getGeneratedKeys();
 
-            while (decision != 1 || decision != 0) {
-                System.out.println("Please enter a valid response. Press 1 to try again or 0 to exit the database application");
-                decision = aScanner.nextInt();
-            }
 
-            if (decision == 1) {
-                promptCreateAccount();
+            
+            if (aOutput.next()) {
+                System.out.println("Successfully created account.");
             }
             else {
-                System.exit(0);
+                System.err.println("\nCould not create account. Press 1 to try again or 0 to exit the database application");
+                int decision = aScanner.nextInt();
+
+                while (decision != 1 && decision != 0) {
+                    System.out.println("Please enter a valid response. Press 1 to try again or 0 to exit the database application");
+                    decision = aScanner.nextInt();
+                }
+
+                if (decision == 1) {
+                    promptCreateAccount();
+                }
+                else {
+                	System.out.println("exit successful");
+                    System.exit(0);
+                }
             }
-        }
     }
 
     /**
      * The database's main menu
      */
     private static void promptMainMenu(){
+    	
+    	System.out.println("welcome to main menu");
+
 
     }
 
