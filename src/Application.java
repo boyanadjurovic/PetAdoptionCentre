@@ -25,8 +25,10 @@ public class Application {
         String answer = aScanner.next();
         answer = answer.toLowerCase();
 
-        if (answer.equals("0")) // todo someone please check if you can check for 0 like this when getting a String for answer
-            return;
+        if (answer.equals("0"))  {
+        	closeDatabase();
+        	return;
+        }
 
         /*while (!answer.equals("y") || !answer.equals("n") || !answer.equals("yes") || !answer.equals("no")){
             System.out.println("Please enter a valid response (y/n)");
@@ -55,6 +57,7 @@ public class Application {
             authLogin(eid, password);
         } catch (SQLException e) {
             System.err.println("Login: SQL Exception " + e.getMessage());
+            closeDatabase();
             return;
         }
     }
@@ -89,7 +92,9 @@ public class Application {
             }
             else if (decision ==0){
             	System.out.println("exit successful");
-                System.exit(0);
+            	
+                closeDatabase();
+                return;
             }
         }
     }
@@ -108,12 +113,16 @@ public class Application {
             eid = aScanner.nextInt();
             length = String.valueOf(eid).length();
         }*/
-        if (eid == 0)
-            return;promptMainMenu();
+        if (eid == 0) {
+        	closeDatabase();
+            return;
+        }
+        promptMainMenu();
 
         System.out.println("Please enter your password");
         String password = aScanner.next();
         if (password.equals("0")) {
+        	closeDatabase();
             return;
         }
 
@@ -123,12 +132,15 @@ public class Application {
             System.out.println("Please enter BOTH a first and last name less than 30 characters total");
             name = aScanner.next();
         }*/
-        if (name.equals("0"))
+        if (name.equals("0")) {
+        	closeDatabase();
             return;
+        }
 
         System.out.println("Please enter your address");
         String address = aScanner.next();
         if (address.equals("0")) {
+        	closeDatabase();
             return;
         }
 
@@ -141,6 +153,7 @@ public class Application {
             length = String.valueOf(wage).length();
         }*/
         if (wage == 0) {
+        	closeDatabase();
             return;
         }
 
@@ -148,6 +161,7 @@ public class Application {
             authCreateAccount(eid, name, address, wage, password);
         } catch (SQLException e) {
             System.err.println("Create account: SQL Exception " + e.getMessage());
+            closeDatabase();
             return;
         }
 
@@ -188,8 +202,9 @@ public class Application {
                     promptCreateAccount();
                 }
                 else {
-                	System.out.println("exit successful");
-                    System.exit(0);
+                	System.out.println("Exit successful");
+                	closeDatabase();
+                	return;
                 }
             }
     }
@@ -277,11 +292,22 @@ public class Application {
 			//}
 
 		} catch (SQLException e) {
-			// TODO Auto-generated catch block
+			closeDatabase();
 			e.printStackTrace();
 		}
     	
     	
+    }
+    
+    public static void closeDatabase() {
+    	try {
+    		aConnection.close();
+    		aStatement.close();
+    		aOutput.close();
+    	}
+    	catch (SQLException e) {
+    		System.err.println("Could not close connections to database");
+    	}
     }
     
     
@@ -300,9 +326,7 @@ public class Application {
             aConnection = DriverManager.getConnection("jdbc:postgresql://comp421.cs.mcgill.ca:5432/cs421", "cs421g31", "1234Group31");
             aStatement = aConnection.createStatement();
             promptWelcomeMenu();
-            aConnection.close();
-            aStatement.close();
-            aOutput.close();
+            closeDatabase();
         }
         catch(Exception e) {
             System.err.println("Could not connect to database");
