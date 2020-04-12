@@ -67,18 +67,13 @@ public class Application {
      */
     private static void authLogin(int pEID, String pPassword) throws SQLException {
         aStatement = aConnection.createStatement();
-    	aQuery = "SELECT eid FROM employee WHERE eid = " + pEID + " AND password = '" + pPassword +"'" ;
+    	aQuery = "SELECT eid, name FROM employee WHERE eid = " + pEID + " AND password = '" + pPassword +"'" ;
         aOutput = aStatement.executeQuery(aQuery);
         if (aOutput.next()) {
             
-            aQuery = "SELECT name FROM employee WHERE eid = " + pEID ;
-            aOutput = aStatement.executeQuery(aQuery);
-            
-            String name = aOutput.toString();
-            String name2 = aOutput.getString(1);
-            String name3 = aOutput.getString("name");
+            String name = aOutput.getString("name");
             System.out.println(aOutput);
-            //System.out.println("\nWelcome " + name3 + "!");
+            System.out.println("\nWelcome " + name + "!");
             promptMainMenu();
         }
         else {
@@ -204,7 +199,7 @@ public class Application {
      */
     private static void promptMainMenu(){
     	
-    	System.out.println("welcome to main menu");
+    	System.out.println("welcome to our main menu.");
 
 
     }
