@@ -1,8 +1,6 @@
+import java.util.Calendar;
 import java.util.Scanner;
 import java.sql.*;
-import java.sql.DriverManager;
-import java.sql.Connection;
-import java.sql.SQLException;
 
 public class Application {
 
@@ -11,6 +9,7 @@ public class Application {
     private static String aQuery;
     private static ResultSet aOutput;
     private static Scanner aScanner = new Scanner(System.in);
+    private static PreparedStatement preparePetInfo;
 
     private static int aEID;
 
@@ -70,11 +69,11 @@ public class Application {
      */
     private static void authLogin(int pEID, String pPassword) throws SQLException {
         aStatement = aConnection.createStatement();
+        
     	aQuery = "SELECT eid, name FROM employee WHERE eid = " + pEID + " AND password = '" + pPassword +"'" ;
         aOutput = aStatement.executeQuery(aQuery);
         if (aOutput.next()) {
             
-            String name = aOutput.getString("name");
             System.out.println("\nWelcome " + aOutput.getString("name") + "!");
             promptMainMenu();
         }
@@ -117,7 +116,7 @@ public class Application {
         	closeDatabase();
             return;
         }
-        promptMainMenu();
+        //promptMainMenu();
 
         System.out.println("Please enter your password");
         String password = aScanner.next();
@@ -127,7 +126,7 @@ public class Application {
         }
 
         System.out.println("Please enter your first and last name");
-        String name = aScanner.next();
+        String name = aScanner.nextLine();
         /*while (!name.contains(" ") || name.length() > 30 || !name.equals("0")) {
             System.out.println("Please enter BOTH a first and last name less than 30 characters total");
             name = aScanner.next();
@@ -138,7 +137,7 @@ public class Application {
         }
 
         System.out.println("Please enter your address");
-        String address = aScanner.next();
+        String address = aScanner.nextLine();
         if (address.equals("0")) {
         	closeDatabase();
             return;
@@ -211,26 +210,32 @@ public class Application {
 
     /**
      * The database's main menu
+     * @throws SQLException 
      */
-    private static void promptMainMenu(){
+    private static void promptMainMenu() throws SQLException{
     	
     	System.out.println("welcome to our main menu.");
     	System.out.println("You may: \n"
     			+ "1) Look up for a pet's information\n"
-    			+ "2) See pet's medical information\n"
-    			+ "3) Add a new pet\n"
-    			+ "4) Promote an employee to manager\n"
+    			+ "2) Get pet's medical history\n"
+    			+ "3) Add a rescued pet in centre's database\n"
+    			+ "4) \n"
     			+ "5) \n"
-    			+ "6)\n");
+    			+ "6) Exit\n");
     	System.out.println("Choose from options 1, 2, 3, 4, 5, or 6 ");
     	int option = aScanner.nextInt();
     	
     	if(option == 1) lookUpPetInfo();
-    	else if(option == 2) ;
-    	else if(option== 3);
+    	else if(option == 2) petMedicalInfo();
+    	else if(option== 3) addRescuedPet();
     	else if(option == 4);
     	else if(option == 5);
-    	else if(option == 6);
+    	
+    	else if(option == 6) {
+    		closeDatabase();
+    		return;
+        }
+    	
     	else {
     		System.out.println("Invalid input. Please enter 1, 2, 3, 4, 5, or 6.");
     		promptMainMenu();
@@ -239,85 +244,169 @@ public class Application {
 
     }
     
-    public static void lookUpPetInfo() {
+    public static void lookUpPetInfo() throws SQLException {
     	
     	System.out.println("Please enter pet's pid: ");
     	int pid = aScanner.nextInt();
-    	System.out.println("Please enter the attribute you need: (choose from : all, date, weight, breed, species, kno, mid, birthdate, name)");
+    	System.out.println("Please enter the attribute you need: (choose from : date, weight, breed, species, kno, mid, birthdate, name)");
     	String str = aScanner.next().toLowerCase();
     	
     	
     	try {
-    		
-			PreparedStatement preparePetInfo = aConnection.prepareStatement("SELECT pid, ? FROM pet WHERE pid = ?");
+			preparePetInfo = aConnection.prepareStatement("SELECT "+str+" FROM pet WHERE pid = ?");
 
-			if(str == "all") {
-				str = " date, weight, breed, species, kno, mid, birthdate, name";
-			}
 			
-			//while(true) {
-							
-				preparePetInfo.setString(1, str);
-				
-				preparePetInfo.setInt(2, pid);
+			preparePetInfo.setInt(1, pid);
 				
 				aOutput = preparePetInfo.executeQuery();
 				
 				
 				if(aOutput.next()) {
 					
-					if(str.contentEquals("date") || str.contentEquals("birthdate")) {
-						System.out.println(str + " of pet " + pid +" is " + aOutput.getDate(str));
+					if(str.equals("date") || str.equals("birthdate")) {
+						System.out.println(str + " of pet " + pid +" is " + aOutput.getDate("date"));
 					}
 					if(str.equals("weight")) {
-						System.out.println(str + " of pet " + pid + " is " + aOutput.getDouble(str));
+						System.out.println(str + " of pet " + pid + " is " + aOutput.getString(1));
 					}
 					if(str.equals("breed") || str.equals("species") || str.equals("kno") || str.equals("mid") || str.equals("name")) {
-						System.out.println(str+ " of pet " + pid + " is " + aOutput.getString(str));
+						
+						System.out.println(str+ " of pet " + pid + " is " + aOutput.getString(1));
 						
 					}
-					if(str.equals("all")) {
-						System.out.println("pid: " + pid + " | date: " + aOutput.getDate("date")
-											+ " | weight: " + aOutput.getDouble("weight")
-											+ " | breed: " + aOutput.getString("breed")
-											+ " | species: " + aOutput.getString("species")
-											+ " | kno: " + aOutput.getString("kno")
-											+ " | mid: " + aOutput.getString("mid")
-											+ " | birthdate: " + aOutput.getDate("birthdate")
-											+ " | name: " + aOutput.getString("name"));
-					}
+
 				
 				}
-				preparePetInfo.close();
+				//preparePetInfo.close();
 			//}
 
 		} catch (SQLException e) {
+			
 			closeDatabase();
+			System.out.println("database closed");
 			e.printStackTrace();
 		}
+    	System.out.println("\n\n\n");
+    	promptMainMenu();
+    }
+    
+
+    
+    
+    public static void petMedicalInfo() throws SQLException {
+    	System.out.println("Please enter pet's pid: ");
+    	int pid = aScanner.nextInt();
+    	System.out.println("The medical history of pet (pid:"+pid+")");
     	
+    	 aQuery="SELECT ccondition, pcondition, medication FROM medicalhistory WHERE pid="+pid;
+    	 aOutput = aStatement.executeQuery(aQuery);
+    	 
+    	 try {
+    		 if(aOutput.next()) {
+		     System.out.println("Current condition: "+aOutput.getString("ccondition"));
+	    	 System.out.println("Past history: "+aOutput.getString("pcondition"));
+	    	 System.out.println("Medication: "+aOutput.getString("medication"));
+    		 }
+    		 
+    	 }
+    	 catch(SQLException e) {
+    		 closeDatabase();
+ 			System.out.println("database closed");
+ 			e.printStackTrace();
+    	 }
+    	System.out.println("\n\n\n");
+    	promptMainMenu();
     	
     }
+    
+    
+    
+    public static void addRescuedPet() throws SQLException{
+    	
+    	
+    	try {
+    		
+    		System.out.println("Enter the eid of the employee who rescued the pet: ");
+    		int rescuerEid = aScanner.nextInt();
+    		
+    		System.out.println("Enter the weight of the pet:");
+    		Double petWeight = aScanner.nextDouble();
+    		
+    		System.out.println("Enter the breed of the pet: ");
+    		String petBreed = aScanner.nextLine();
+    		
+    		System.out.println("Enter the species of the pet: ");
+    		String petSpecies = aScanner.nextLine();
+    		
+    		System.out.println("Enter the name of the pet: ");
+    		String petName = aScanner.nextLine();
+    		
+    		Date date = (Date) Calendar.getInstance().getTime();
+    		System.out.println("Date: "+date);
+    		
+    		aOutput = aStatement.executeQuery("select pid, kno, mid from pet");
+    		
+    		if(aOutput.next()) {
+    			int uniquePid = (int)(Math.random()*99999+10000);
+    			int uniqueKno = (int)(Math.random()*99+1);
+    			String uniqueMid = Integer.toString((int)(Math.random()*99999+10000));
+    			
+    				try {
+    					aQuery="insert into pet (pid,date,weight,breed,species,kno,mid,birthdate,name)"
+    							+ "values ("+uniquePid+","+date+","+petWeight+","+petBreed+","+petSpecies+","+uniqueKno+","+uniqueMid+","+date+","+petName+")";
+    					
+    					aStatement.executeUpdate(aQuery, Statement.RETURN_GENERATED_KEYS);
+    			        aOutput = aStatement.getGeneratedKeys();
+    			        if(aOutput.next()) {
+    			        	System.out.println("Pet added to database");
+    			
+    			        }
+    			        aQuery ="insert into rescue (eid,pid) values ("+rescuerEid+","+uniquePid+")";
+    			        aStatement.executeUpdate(aQuery, Statement.RETURN_GENERATED_KEYS);
+    			        aOutput = aStatement.getGeneratedKeys();
+    			        if(aOutput.next()) {
+    			        	System.out.println("Rescue table updated");
+    			        }
+    			        
+    			        
+    				}
+    				catch(SQLException e) {
+    					System.out.println("error occured here");
+    					addRescuedPet();
+    					closeDatabase();
+    					e.printStackTrace();
+    				}
+
+    			
+    		}
+    		
+    	}
+    	catch (SQLException e) {
+    		 closeDatabase();
+  			System.out.println("database closed");
+  			e.printStackTrace();
+    	}
+    	
+    }
+    
     
     public static void closeDatabase() {
     	try {
     		aConnection.close();
     		aStatement.close();
     		aOutput.close();
+    		preparePetInfo.close();
+    		System.out.println("database closed");
     	}
     	catch (SQLException e) {
     		System.err.println("Could not close connections to database");
     	}
+    	
     }
-    
-    
-    public static void petMedicalInfo() {}
-    public static void addPet() {}
-    public static void promoteEmployee() {}
 
     public static void main(String[] args) {
 
-        try {
+    	try {
             DriverManager.registerDriver ( new org.postgresql.Driver() ) ;
         } catch (Exception cnfe){
             System.out.println("Class not found");
@@ -325,10 +414,12 @@ public class Application {
         try	{
             aConnection = DriverManager.getConnection("jdbc:postgresql://comp421.cs.mcgill.ca:5432/cs421", "cs421g31", "1234Group31");
             aStatement = aConnection.createStatement();
+            System.out.println("connection successful");
             promptWelcomeMenu();
             closeDatabase();
         }
         catch(Exception e) {
+        	closeDatabase();
             System.err.println("Could not connect to database");
             System.exit(1); // 1 for error
         }
