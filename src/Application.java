@@ -18,20 +18,22 @@ public class Application {
      * Welcome menu prompt
      */
     private static void promptWelcomeMenu() {
-        System.out.println(" *** WELCOME TO THE PET ADOPTION CENTRE DATABASE *** \n\n");
+        System.out.println(" *** WELCOME TO THE PET ADOPTION CENTRE DATABASE ***");
         System.out.println("If you wish to exit the system, please press 0");
-        System.out.println("Are you an existing employee? (y/n) \n");
+        System.out.println("Are you an existing employee? (y/n)");
 
         String answer = aScanner.next();
         answer = answer.toLowerCase();
 
-        if (answer.equals("0")) // todo someone please check if you can check for 0 like this when getting a String for answer
-            System.exit(0);
-
-        while (!answer.equals("y") || !answer.equals("n") || !answer.equals("yes") || !answer.equals("no")){
-            System.out.println("Please enter a valid response (y/n");
-            answer = aScanner.next();
+        if (answer.equals("0"))  {
+        	closeDatabase();
+        	return;
         }
+
+        /*while (!answer.equals("y") || !answer.equals("n") || !answer.equals("yes") || !answer.equals("no")){
+            System.out.println("Please enter a valid response (y/n)");
+            answer = aScanner.next();
+        }*/
 
         if (answer.equals("y") || answer.equals("yes"))
             promptLogin();
@@ -54,8 +56,9 @@ public class Application {
         try {
             authLogin(eid, password);
         } catch (SQLException e) {
-            System.err.println("Login: SQL Exception" + e.getMessage());
-            e.printStackTrace();
+            System.err.println("Login: SQL Exception " + e.getMessage());
+            closeDatabase();
+            return;
         }
     }
 
@@ -66,23 +69,20 @@ public class Application {
      * @throws SQLException
      */
     private static void authLogin(int pEID, String pPassword) throws SQLException {
-        aQuery = "SELECT eid FROM employee WHERE eid = " + pEID + " AND password = " + pPassword + ";";
+        aStatement = aConnection.createStatement();
+    	aQuery = "SELECT eid, name FROM employee WHERE eid = " + pEID + " AND password = '" + pPassword +"'" ;
         aOutput = aStatement.executeQuery(aQuery);
-
         if (aOutput.next()) {
-            aEID = aOutput.getInt(1);
-
-            aQuery = "SELECT name FROM employee WHERE eid = " + aEID + ";";
-            aOutput = aStatement.executeQuery(aQuery);
-            String name = aOutput.getString(1);
-            System.out.println("\nWelcome " + name + "!");
+            
+            String name = aOutput.getString("name");
+            System.out.println("\nWelcome " + aOutput.getString("name") + "!");
             promptMainMenu();
         }
         else {
             System.err.println("\nInvalid login information. Press 1 to try again or 0 to exit the database application");
             int decision = aScanner.nextInt();
 
-            while (decision != 1 || decision != 0) {
+            while (decision != 1 && decision != 0) {
                 System.out.println("Please enter a valid response. Press 1 to try again or 0 to exit the database application");
                 decision = aScanner.nextInt();
             }
@@ -90,8 +90,11 @@ public class Application {
             if (decision == 1) {
                 promptLogin();
             }
-            else {
-                System.exit(0);
+            else if (decision ==0){
+            	System.out.println("exit successful");
+            	
+                closeDatabase();
+                return;
             }
         }
     }
@@ -101,56 +104,65 @@ public class Application {
      */
     private static void promptCreateAccount() {
         System.out.println("You may enter 0 to exit the system at any time");
-        System.out.println("Please enter your 4 digit employeeid");
+        System.out.println("Please enter your new 4 digit employeeid");
 
         int eid = aScanner.nextInt();
         int length = String.valueOf(eid).length();
-        while (length != 4 || eid != 0) {
+        /*while (length != 4 || eid != 0) {
             System.out.println("Please enter a valid 4 digit employeeid");
             eid = aScanner.nextInt();
             length = String.valueOf(eid).length();
+        }*/
+        if (eid == 0) {
+        	closeDatabase();
+            return;
         }
-        if (eid == 0)
-            System.exit(0);
+        promptMainMenu();
 
         System.out.println("Please enter your password");
         String password = aScanner.next();
         if (password.equals("0")) {
-            System.exit(0);
+        	closeDatabase();
+            return;
         }
 
         System.out.println("Please enter your first and last name");
         String name = aScanner.next();
-        while (!name.contains(" ") || name.length() > 30 || !name.equals("0")) {
+        /*while (!name.contains(" ") || name.length() > 30 || !name.equals("0")) {
             System.out.println("Please enter BOTH a first and last name less than 30 characters total");
             name = aScanner.next();
+        }*/
+        if (name.equals("0")) {
+        	closeDatabase();
+            return;
         }
-        if (name.equals("0"))
-            System.exit(0);
 
         System.out.println("Please enter your address");
         String address = aScanner.next();
         if (address.equals("0")) {
-            System.exit(0);
+        	closeDatabase();
+            return;
         }
 
         System.out.println("Please enter your starting wage");
         int wage = aScanner.nextInt();
         length = String.valueOf(wage).length();
-        while (length < 2 || wage != 0) {
+        /*while (length < 2 || wage != 0) {
             System.out.println("Invalid wage. All employees are paid at least $10/hour. Please re-enter");
             wage = aScanner.nextInt();
             length = String.valueOf(wage).length();
-        }
+        }*/
         if (wage == 0) {
-            System.exit(0);
+        	closeDatabase();
+            return;
         }
 
         try {
             authCreateAccount(eid, name, address, wage, password);
         } catch (SQLException e) {
-            System.err.println("Create account: SQL Exception" + e.getMessage());
-            e.printStackTrace();
+            System.err.println("Create account: SQL Exception " + e.getMessage());
+            closeDatabase();
+            return;
         }
 
     }
@@ -164,28 +176,37 @@ public class Application {
      * @throws SQLException
      */
     private static void authCreateAccount(int pEID, String pName, String pAddress, int pWage, String pPassword) throws SQLException {
-        aQuery = "INSERT INTO employee VALUES (" + pEID + ", '" + pName + "', '" + pAddress + "', " + pWage + ", '" + pPassword + "');";
-        aOutput = aStatement.executeQuery(aQuery);
+        
+    	aQuery = "insert into employee (eid,name,address,wage,password) values ("+  pEID +",'"+ pName +"','" + pAddress+ "',"+pWage + ",'" + pPassword +"')";
 
-        if (aOutput.next()) {
-            System.out.println("Successfully created account.");
-        }
-        else {
-            System.err.println("\nCould not create account. Press 1 to try again or 0 to exit the database application");
-            int decision = aScanner.nextInt();
+        
+        aStatement.executeUpdate(aQuery, Statement.RETURN_GENERATED_KEYS);
+        aOutput = aStatement.getGeneratedKeys();
 
-            while (decision != 1 || decision != 0) {
-                System.out.println("Please enter a valid response. Press 1 to try again or 0 to exit the database application");
-                decision = aScanner.nextInt();
-            }
 
-            if (decision == 1) {
-                promptCreateAccount();
+            
+            if (aOutput.next()) {
+                System.out.println("Successfully created account.");
+                promptMainMenu();
             }
             else {
-                System.exit(0);
+                System.err.println("\nCould not create account. Press 1 to try again or 0 to exit the database application");
+                int decision = aScanner.nextInt();
+
+                while (decision != 1 && decision != 0) {
+                    System.out.println("Please enter a valid response. Press 1 to try again or 0 to exit the database application");
+                    decision = aScanner.nextInt();
+                }
+
+                if (decision == 1) {
+                    promptCreateAccount();
+                }
+                else {
+                	System.out.println("Exit successful");
+                	closeDatabase();
+                	return;
+                }
             }
-        }
     }
 
 
@@ -193,8 +214,107 @@ public class Application {
      * The database's main menu
      */
     private static void promptMainMenu(){
+    	
+    	System.out.println("welcome to our main menu.");
+    	System.out.println("You may: \n"
+    			+ "1) Look up for a pet's information\n"
+    			+ "2) See pet's medical information\n"
+    			+ "3) Add a new pet\n"
+    			+ "4) Promote an employee to manager\n"
+    			+ "5) \n"
+    			+ "6)\n");
+    	System.out.println("Choose from options 1, 2, 3, 4, 5, or 6 ");
+    	int option = aScanner.nextInt();
+    	
+    	if(option == 1) lookUpPetInfo();
+    	else if(option == 2) ;
+    	else if(option== 3);
+    	else if(option == 4);
+    	else if(option == 5);
+    	else if(option == 6);
+    	else {
+    		System.out.println("Invalid input. Please enter 1, 2, 3, 4, 5, or 6.");
+    		promptMainMenu();
+    	}
+
 
     }
+    
+    public static void lookUpPetInfo() {
+    	
+    	System.out.println("Please enter pet's pid: ");
+    	int pid = aScanner.nextInt();
+    	System.out.println("Please enter the attribute you need: (choose from : all, date, weight, breed, species, kno, mid, birthdate, name)");
+    	String str = aScanner.next().toLowerCase();
+    	
+    	
+    	try {
+    		
+			PreparedStatement preparePetInfo = aConnection.prepareStatement("SELECT pid, ? FROM pet WHERE pid = ?");
+
+			if(str == "all") {
+				str = " date, weight, breed, species, kno, mid, birthdate, name";
+			}
+			
+			//while(true) {
+							
+				preparePetInfo.setString(1, str);
+				
+				preparePetInfo.setInt(2, pid);
+				
+				aOutput = preparePetInfo.executeQuery();
+				
+				
+				if(aOutput.next()) {
+					
+					if(str.contentEquals("date") || str.contentEquals("birthdate")) {
+						System.out.println(str + " of pet " + pid +" is " + aOutput.getDate(str));
+					}
+					if(str.equals("weight")) {
+						System.out.println(str + " of pet " + pid + " is " + aOutput.getDouble(str));
+					}
+					if(str.equals("breed") || str.equals("species") || str.equals("kno") || str.equals("mid") || str.equals("name")) {
+						System.out.println(str+ " of pet " + pid + " is " + aOutput.getString(str));
+						
+					}
+					if(str.equals("all")) {
+						System.out.println("pid: " + pid + " | date: " + aOutput.getDate("date")
+											+ " | weight: " + aOutput.getDouble("weight")
+											+ " | breed: " + aOutput.getString("breed")
+											+ " | species: " + aOutput.getString("species")
+											+ " | kno: " + aOutput.getString("kno")
+											+ " | mid: " + aOutput.getString("mid")
+											+ " | birthdate: " + aOutput.getDate("birthdate")
+											+ " | name: " + aOutput.getString("name"));
+					}
+				
+				}
+				preparePetInfo.close();
+			//}
+
+		} catch (SQLException e) {
+			closeDatabase();
+			e.printStackTrace();
+		}
+    	
+    	
+    }
+    
+    public static void closeDatabase() {
+    	try {
+    		aConnection.close();
+    		aStatement.close();
+    		aOutput.close();
+    	}
+    	catch (SQLException e) {
+    		System.err.println("Could not close connections to database");
+    	}
+    }
+    
+    
+    public static void petMedicalInfo() {}
+    public static void addPet() {}
+    public static void promoteEmployee() {}
 
     public static void main(String[] args) {
          //Statement stmt;
@@ -205,6 +325,7 @@ public class Application {
             System.out.println("Class not found");
         }
         try	{
+<<<<<<< HEAD
 //            aConnection = DriverManager.getConnection("jdbc:postgresql://comp421.cs.mcgill.ca:5432/cs421", "cs421g31", "1234Group31");
 //            aStatement = aConnection.createStatement();
 //            promptWelcomeMenu();
@@ -221,6 +342,12 @@ public class Application {
            aStatement = aConnection.createStatement();
            promptWelcomeMenu();
 
+=======
+            aConnection = DriverManager.getConnection("jdbc:postgresql://comp421.cs.mcgill.ca:5432/cs421", "cs421g31", "1234Group31");
+            aStatement = aConnection.createStatement();
+            promptWelcomeMenu();
+            closeDatabase();
+>>>>>>> cd00dfb8e475a7fde942bee540adbfd37f663f6b
         }
         catch(Exception e) {
             System.err.println("Could not connect to database");
