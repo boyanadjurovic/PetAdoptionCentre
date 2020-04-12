@@ -188,7 +188,6 @@ public class Application {
         }
     }
 
-
     /**
      * The database's main menu
      */
@@ -197,30 +196,18 @@ public class Application {
     }
 
     public static void main(String[] args) {
-         //Statement stmt;
 
         try {
-            DriverManager.registerDriver(new org.postgresql.Driver());
-        } catch (Exception cnfe) {
+            DriverManager.registerDriver ( new org.postgresql.Driver() ) ;
+        } catch (Exception cnfe){
             System.out.println("Class not found");
         }
         try	{
-//            aConnection = DriverManager.getConnection("jdbc:postgresql://comp421.cs.mcgill.ca:5432/cs421", "cs421g31", "1234Group31");
-//            aStatement = aConnection.createStatement();
-//            promptWelcomeMenu();
-//            aConnection.close();
-//            aStatement.close();
-
-
-            //Postgresql connection info
-            String url = "jdbc:postgresql://comp421.cs.mcgill.ca:5432/cs421";
-            String usernamestring = "cs421g31";
-            String passwordstring = "1234Group31";
-            aConnection = DriverManager.getConnection(url, usernamestring, passwordstring);
-
-           aStatement = aConnection.createStatement();
-           promptWelcomeMenu();
-
+            aConnection = DriverManager.getConnection("jdbc:postgresql://comp421.cs.mcgill.ca:5432/cs421", "cs421g31", "1234Group31");
+            aStatement = aConnection.createStatement();
+            promptWelcomeMenu();
+            aConnection.close();
+            aStatement.close();
         }
         catch(Exception e) {
             System.err.println("Could not connect to database");
