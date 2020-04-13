@@ -312,67 +312,86 @@ public class Application {
     
     
     public static void addRescuedPet() throws SQLException{
+    	
+    	
+    
 
-    	try {
+
     		
-    		System.out.println("Enter the eid of the employee who rescued the pet: ");
-    		int rescuerEid = aScanner.nextInt();
-    		aScanner.nextLine();
+
     		
-    		System.out.println("Enter the weight of the pet:");
-    		Double petWeight = aScanner.nextDouble();
-    		aScanner.nextLine();
     		
-    		System.out.println("Enter the breed of the pet: ");
-    		String petBreed = aScanner.nextLine();
-    		
-    		System.out.println("Enter the species of the pet: ");
-    		String petSpecies = aScanner.nextLine();
-    		
-    		System.out.println("Enter the name of the pet: ");
-    		String petName = aScanner.nextLine();
-    		
-    		Date date = (Date) Calendar.getInstance().getTime();
-    		System.out.println("Date: "+ date);
-    		
-    		aOutput = aStatement.executeQuery("select pid, kno, mid from pet");
-    		
-    		if(aOutput.next()) {
-    			int uniquePid = (int)(Math.random()*99999+10000);
-    			int uniqueKno = (int)(Math.random()*99+1);
-    			String uniqueMid = Integer.toString((int)(Math.random()*99999+10000));
+ 			
+
     			
     				try {
-    					aQuery="insert into pet (pid,date,weight,breed,species,kno,mid,birthdate,name)"
-    							+ "values ("+uniquePid+","+date+","+petWeight+","+petBreed+","+petSpecies+","+uniqueKno+","+uniqueMid+","+date+","+petName+")";
     					
-    					aStatement.executeUpdate(aQuery, Statement.RETURN_GENERATED_KEYS);
-    			        aOutput = aStatement.getGeneratedKeys();
-    			        if(aOutput.next()) {
+    		    		java.util.Date date2=new java.util.Date();
+    					
+    					java.sql.Date sqlDate=new java.sql.Date(date2.getTime());
+    					
+    					
+    					preparePetInfo=aConnection.prepareStatement("insert into pet (pid,date,weight,breed,species,kno,mid,birthdate,name) values (?,'?',?,'?','?','not yet declared','no history yet','?','?')");
+    					
+    					
+    		    		System.out.println("Enter the weight of the pet:");
+    		    		double petWeight = aScanner.nextDouble();
+    		    		
+    		    		System.out.println("Enter the breed of the pet: ");
+    		    		aScanner.nextLine();
+    		    		String petBreed = aScanner.nextLine();
+    		    		
+    		    		System.out.println("Enter the species of the pet: ");
+    		    		String petSpecies = aScanner.nextLine();
+    		    		
+    		    		System.out.println("Enter the name of the pet: ");
+    		    		String petName = aScanner.next();
+    					//aScanner.next();
+    					
+    					int uniquePid = (int)(Math.random()*999+100);
+
+    					preparePetInfo.setInt(1,uniquePid);
+    					preparePetInfo.setDate(2,sqlDate);
+    					preparePetInfo.setDouble(3, petWeight);
+    					preparePetInfo.setString(4, petBreed);
+    					preparePetInfo.setString(5, petSpecies);
+    					preparePetInfo.setDate(6,sqlDate);
+    					preparePetInfo.setString(7, petName);
+    					
+    					int row= preparePetInfo.executeUpdate();			
+    			        
+    					
+    			        System.out.println(row +"rows");
+    			        
+    			       // if(aOutput.next()) {
     			        	System.out.println("Pet added to database");
+    			        	
     			
-    			        }
+    			       // }
+    			        	System.out.println("Enter the eid of the employee who rescued the pet: ");
+        		    		int rescuerEid = aScanner.nextInt();
+        		    		
+        		    		
     			        aQuery ="insert into rescue (eid,pid) values ("+rescuerEid+","+uniquePid+")";
     			        aStatement.executeUpdate(aQuery, Statement.RETURN_GENERATED_KEYS);
     			        aOutput = aStatement.getGeneratedKeys();
     			        if(aOutput.next()) {
     			        	System.out.println("Rescue table updated");
     			        }
- 
+    			        
+    			        
     				}
     				catch(SQLException e) {
     					System.out.println("error occured here");
-    					addRescuedPet();
+    					//addRescuedPet();
     					closeDatabase();
     					e.printStackTrace();
     				}
-    		}
+
+    			
+    	
     		
-    	}
-    	catch (SQLException e) {
-    		closeDatabase();
-  			e.printStackTrace();
-    	}
+   
     	
     }
     
