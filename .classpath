@@ -1,8 +1,12 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <classpath>
 	<classpathentry kind="src" path="src"/>
-	<classpathentry exported="true" kind="lib" path="/Users/yona/Downloads/postgresql-42.2.12.jar"/>
-	<classpathentry exported="true" kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER">
+	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER">
+		<attributes>
+			<attribute name="module" value="true"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry kind="lib" path="/Users/boyanadjurovic/Desktop/postgresql-42.2.12.jar">
 		<attributes>
 			<attribute name="module" value="true"/>
 		</attributes>

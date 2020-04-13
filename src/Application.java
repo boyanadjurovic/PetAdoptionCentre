@@ -27,7 +27,6 @@ public class Application {
 
         if (answer.equals("0"))  {
         	closeDatabase();
-        	return;
         }
 
 
@@ -55,7 +54,6 @@ public class Application {
         } catch (SQLException e) {
             System.err.println("Login: SQL Exception " + e.getMessage());
             closeDatabase();
-            return;
         }
     }
 
@@ -95,7 +93,6 @@ public class Application {
         
         if (eid == 0) {
         	closeDatabase();
-            return;
         }
         //promptMainMenu();
 
@@ -103,7 +100,6 @@ public class Application {
         String password = aScanner.nextLine();
         if (password.equals("0")) {
         	closeDatabase();
-            return;
         }
 
         System.out.println("Please enter your first and last name");
@@ -111,14 +107,12 @@ public class Application {
         
         if (name.equals("0")) {
         	closeDatabase();
-            return;
         }
 
         System.out.println("Please enter your address");
         String address = aScanner.nextLine();
         if (address.equals("0")) {
         	closeDatabase();
-            return;
         }
 
         System.out.println("Please enter your starting wage");
@@ -128,7 +122,6 @@ public class Application {
         
         if (wage == 0) {
         	closeDatabase();
-            return;
         }
 
         try {
@@ -136,7 +129,6 @@ public class Application {
         } catch (SQLException e) {
             System.err.println("Create account: SQL Exception " + e.getMessage());
             closeDatabase();
-            return;
         }
 
     }
@@ -179,7 +171,6 @@ public class Application {
                 else {
                 	System.out.println("Exit successful");
                 	closeDatabase();
-                	return;
                 }
             }
     }
@@ -266,9 +257,9 @@ public class Application {
 
 		} catch (SQLException e) {
 			
-			closeDatabase();
-			System.out.println("database closed");
-			e.printStackTrace();
+			System.err.println("lookUpPetInfo: SQL Exception " + e.getMessage());
+            closeDatabase();
+			
 		}
     	System.out.println("\n\n\n");
     	promptMainMenu();
@@ -292,13 +283,12 @@ public class Application {
     		 
     	 }
     	 catch(SQLException e) {
-    		 closeDatabase();
- 			System.out.println("database closed");
- 			e.printStackTrace();
+    		 System.err.println("PetMedicalInfo: SQL Exception " + e.getMessage());
+             closeDatabase();
+ 			
     	 }
     	System.out.println("\n\n\n");
     	promptMainMenu();
-    	
     }
 
     
@@ -388,9 +378,8 @@ public class Application {
 	        }
     	}
     	catch (SQLException e) {
-    		System.err.println("Error occurred accepting the household");
-    		e.printStackTrace();
-    		closeDatabase();
+    		System.err.println("createApplicationForHousehold: SQL Exception " + e.getMessage());
+            closeDatabase();
     	}
     }
     /**
@@ -442,9 +431,9 @@ public class Application {
     		}
     	}
     	catch (SQLException e) {
-    		System.err.println("Error occured promoting the employee");
-    		e.printStackTrace();
-    		closeDatabase();
+    		System.err.println("promoteEmployee: SQL Exception " + e.getMessage());
+            closeDatabase();
+
     	}
     }
     
