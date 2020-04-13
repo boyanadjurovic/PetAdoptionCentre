@@ -30,10 +30,6 @@ public class Application {
         	return;
         }
 
-        /*while (!answer.equals("y") || !answer.equals("n") || !answer.equals("yes") || !answer.equals("no")){
-            System.out.println("Please enter a valid response (y/n)");
-            answer = aScanner.next();
-        }*/
 
         if (answer.equals("y") || answer.equals("yes"))
             promptLogin();
@@ -96,11 +92,7 @@ public class Application {
         int eid = aScanner.nextInt();
         aScanner.nextLine();
         int length = String.valueOf(eid).length();
-        /*while (length != 4 || eid != 0) {
-            System.out.println("Please enter a valid 4 digit employeeid");
-            eid = aScanner.nextInt();
-            length = String.valueOf(eid).length();
-        }*/
+        
         if (eid == 0) {
         	closeDatabase();
             return;
@@ -116,10 +108,7 @@ public class Application {
 
         System.out.println("Please enter your first and last name");
         String name = aScanner.nextLine();
-        /*while (!name.contains(" ") || name.length() > 30 || !name.equals("0")) {
-            System.out.println("Please enter BOTH a first and last name less than 30 characters total");
-            name = aScanner.next();
-        }*/
+        
         if (name.equals("0")) {
         	closeDatabase();
             return;
@@ -136,11 +125,7 @@ public class Application {
         int wage = aScanner.nextInt();
         aScanner.nextLine();
         length = String.valueOf(wage).length();
-        /*while (length < 2 || wage != 0) {
-            System.out.println("Invalid wage. All employees are paid at least $10/hour. Please re-enter");
-            wage = aScanner.nextInt();
-            length = String.valueOf(wage).length();
-        }*/
+        
         if (wage == 0) {
         	closeDatabase();
             return;
@@ -209,27 +194,25 @@ public class Application {
     	System.out.println("You may: \n"
     			+ "1) Look up a pet's information\n"
     			+ "2) Get pet's medical history\n"
-    			+ "3) Add a rescued pet in centre's database\n"
-    			+ "4) Add an application for a household\n"
-    			+ "5) Promote an employee to a manager\n"
-    			+ "6) Exit\n");
-    	System.out.println("Choose from options 1, 2, 3, 4, 5, or 6 ");
+    			+ "3) Add an application for a household\n"
+    			+ "4) Promote an employee to a manager\n"
+    			+ "5) Exit\n");
+    	System.out.println("Choose from options 1, 2, 3, 4, or 5 ");
     	int option = aScanner.nextInt();
     	aScanner.nextLine();
     	
     	if(option == 1) lookUpPetInfo();
     	else if(option == 2) petMedicalInfo();
-    	else if(option== 3) addRescuedPet();
-    	else if(option == 4) createApplicationForHousehold();
-    	else if(option == 5) promoteEmployee();
+    	else if(option == 3) createApplicationForHousehold();
+    	else if(option == 4) promoteEmployee();
     	
-    	else if(option == 6) {
+    	else if(option == 5) {
     		closeDatabase();
     		return;
         }
     	
     	else {
-    		System.out.println("Invalid input. Please enter 1, 2, 3, 4, 5, or 6.");
+    		System.out.println("Invalid input. Please enter 1, 2, 3, 4, or 5.");
     		promptMainMenu();
     	}
 
@@ -266,11 +249,20 @@ public class Application {
 						System.out.println(str+ " of pet " + pid + " is " + aOutput.getString(1));
 						
 					}
+					else{
+						System.out.println("Invalid pid number. Would you like to try again? (Enter yes to continue, enter any key to exit) ");
+						String answr = aScanner.next().toLowerCase();
+						if(answr.equals("yes")) {
+							lookUpPetInfo();
+						}
+						else{
+							closeDatabase();
+				    		return;
+						}
+					}
 
 				
 				}
-				//preparePetInfo.close();
-			//}
 
 		} catch (SQLException e) {
 			
@@ -308,92 +300,7 @@ public class Application {
     	promptMainMenu();
     	
     }
-    
-    
-    
-    public static void addRescuedPet() throws SQLException{
-    	
-    	
-    
 
-
-    		
-
-    		
-    		
- 			
-
-    			
-    				try {
-    					
-    		    		java.util.Date date2=new java.util.Date();
-    					
-    					java.sql.Date sqlDate=new java.sql.Date(date2.getTime());
-    					
-    					
-    					preparePetInfo=aConnection.prepareStatement("insert into pet (pid,date,weight,breed,species,kno,mid,birthdate,name) values (?,'?',?,'?','?','not yet declared','no history yet','?','?')");
-    					
-    					
-    		    		System.out.println("Enter the weight of the pet:");
-    		    		double petWeight = aScanner.nextDouble();
-    		    		
-    		    		System.out.println("Enter the breed of the pet: ");
-    		    		aScanner.nextLine();
-    		    		String petBreed = aScanner.nextLine();
-    		    		
-    		    		System.out.println("Enter the species of the pet: ");
-    		    		String petSpecies = aScanner.nextLine();
-    		    		
-    		    		System.out.println("Enter the name of the pet: ");
-    		    		String petName = aScanner.next();
-    					//aScanner.next();
-    					
-    					int uniquePid = (int)(Math.random()*999+100);
-
-    					preparePetInfo.setInt(1,uniquePid);
-    					preparePetInfo.setDate(2,sqlDate);
-    					preparePetInfo.setDouble(3, petWeight);
-    					preparePetInfo.setString(4, petBreed);
-    					preparePetInfo.setString(5, petSpecies);
-    					preparePetInfo.setDate(6,sqlDate);
-    					preparePetInfo.setString(7, petName);
-    					
-    					int row= preparePetInfo.executeUpdate();			
-    			        
-    					
-    			        System.out.println(row +"rows");
-    			        
-    			       // if(aOutput.next()) {
-    			        	System.out.println("Pet added to database");
-    			        	
-    			
-    			       // }
-    			        	System.out.println("Enter the eid of the employee who rescued the pet: ");
-        		    		int rescuerEid = aScanner.nextInt();
-        		    		
-        		    		
-    			        aQuery ="insert into rescue (eid,pid) values ("+rescuerEid+","+uniquePid+")";
-    			        aStatement.executeUpdate(aQuery, Statement.RETURN_GENERATED_KEYS);
-    			        aOutput = aStatement.getGeneratedKeys();
-    			        if(aOutput.next()) {
-    			        	System.out.println("Rescue table updated");
-    			        }
-    			        
-    			        
-    				}
-    				catch(SQLException e) {
-    					System.out.println("error occured here");
-    					//addRescuedPet();
-    					closeDatabase();
-    					e.printStackTrace();
-    				}
-
-    			
-    	
-    		
-   
-    	
-    }
     
     
     /**
