@@ -10,6 +10,7 @@ public class Application {
     private static ResultSet aOutput;
     private static Scanner aScanner = new Scanner(System.in);
     private static PreparedStatement preparePetInfo;
+    private static int aStatus = 0;
 
     private static int aEID;
 
@@ -48,9 +49,10 @@ public class Application {
     private static void promptLogin() {
         System.out.print("\n\n Please enter your employeeid (eid): ");
         int eid = aScanner.nextInt();
+        aScanner.nextLine();
 
         System.out.print("\nPlease enter your password: ");
-        String password = aScanner.next();
+        String password = aScanner.nextLine();
 
         try {
             authLogin(eid, password);
@@ -75,26 +77,12 @@ public class Application {
         if (aOutput.next()) {
             
             System.out.println("\nWelcome " + aOutput.getString("name") + "!");
+            aEID = pEID;
             promptMainMenu();
         }
         else {
-            System.err.println("\nInvalid login information. Press 1 to try again or 0 to exit the database application");
-            int decision = aScanner.nextInt();
-
-            while (decision != 1 && decision != 0) {
-                System.out.println("Please enter a valid response. Press 1 to try again or 0 to exit the database application");
-                decision = aScanner.nextInt();
-            }
-
-            if (decision == 1) {
-                promptLogin();
-            }
-            else if (decision ==0){
-            	System.out.println("exit successful");
-            	
-                closeDatabase();
-                return;
-            }
+            System.err.println("\nInvalid login information");
+            closeDatabase();
         }
     }
 
@@ -106,6 +94,7 @@ public class Application {
         System.out.println("Please enter your new 4 digit employeeid");
 
         int eid = aScanner.nextInt();
+        aScanner.nextLine();
         int length = String.valueOf(eid).length();
         /*while (length != 4 || eid != 0) {
             System.out.println("Please enter a valid 4 digit employeeid");
@@ -119,7 +108,7 @@ public class Application {
         //promptMainMenu();
 
         System.out.println("Please enter your password");
-        String password = aScanner.next();
+        String password = aScanner.nextLine();
         if (password.equals("0")) {
         	closeDatabase();
             return;
@@ -145,6 +134,7 @@ public class Application {
 
         System.out.println("Please enter your starting wage");
         int wage = aScanner.nextInt();
+        aScanner.nextLine();
         length = String.valueOf(wage).length();
         /*while (length < 2 || wage != 0) {
             System.out.println("Invalid wage. All employees are paid at least $10/hour. Please re-enter");
@@ -186,6 +176,7 @@ public class Application {
             
             if (aOutput.next()) {
                 System.out.println("Successfully created account.");
+                aEID = pEID;
                 promptMainMenu();
             }
             else {
@@ -216,20 +207,21 @@ public class Application {
     	
     	System.out.println("welcome to our main menu.");
     	System.out.println("You may: \n"
-    			+ "1) Look up for a pet's information\n"
+    			+ "1) Look up a pet's information\n"
     			+ "2) Get pet's medical history\n"
     			+ "3) Add a rescued pet in centre's database\n"
-    			+ "4) \n"
-    			+ "5) \n"
+    			+ "4) Add an application for a household\n"
+    			+ "5) Promote an employee to a manager\n"
     			+ "6) Exit\n");
     	System.out.println("Choose from options 1, 2, 3, 4, 5, or 6 ");
     	int option = aScanner.nextInt();
+    	aScanner.nextLine();
     	
     	if(option == 1) lookUpPetInfo();
     	else if(option == 2) petMedicalInfo();
     	else if(option== 3) addRescuedPet();
-    	else if(option == 4);
-    	else if(option == 5);
+    	else if(option == 4) createApplicationForHousehold();
+    	else if(option == 5) promoteEmployee();
     	
     	else if(option == 6) {
     		closeDatabase();
@@ -291,8 +283,6 @@ public class Application {
     }
     
 
-    
-    
     public static void petMedicalInfo() throws SQLException {
     	System.out.println("Please enter pet's pid: ");
     	int pid = aScanner.nextInt();
@@ -322,15 +312,16 @@ public class Application {
     
     
     public static void addRescuedPet() throws SQLException{
-    	
-    	
+
     	try {
     		
     		System.out.println("Enter the eid of the employee who rescued the pet: ");
     		int rescuerEid = aScanner.nextInt();
+    		aScanner.nextLine();
     		
     		System.out.println("Enter the weight of the pet:");
     		Double petWeight = aScanner.nextDouble();
+    		aScanner.nextLine();
     		
     		System.out.println("Enter the breed of the pet: ");
     		String petBreed = aScanner.nextLine();
@@ -342,7 +333,7 @@ public class Application {
     		String petName = aScanner.nextLine();
     		
     		Date date = (Date) Calendar.getInstance().getTime();
-    		System.out.println("Date: "+date);
+    		System.out.println("Date: "+ date);
     		
     		aOutput = aStatement.executeQuery("select pid, kno, mid from pet");
     		
@@ -367,8 +358,7 @@ public class Application {
     			        if(aOutput.next()) {
     			        	System.out.println("Rescue table updated");
     			        }
-    			        
-    			        
+ 
     				}
     				catch(SQLException e) {
     					System.out.println("error occured here");
@@ -376,27 +366,178 @@ public class Application {
     					closeDatabase();
     					e.printStackTrace();
     				}
-
-    			
     		}
     		
     	}
     	catch (SQLException e) {
-    		 closeDatabase();
-  			System.out.println("database closed");
+    		closeDatabase();
   			e.printStackTrace();
     	}
     	
     }
     
     
+    /**
+     * Accepts an existing household's application
+     */
+    public static void createApplicationForHousehold() {
+    	System.out.println("Enter the address of the household: ");
+    	String address = aScanner.nextLine();
+    	
+    	System.out.println("Enter the occupation of the household: ");
+    	String occupation = aScanner.nextLine();
+    	
+    	System.out.println("Enter the first and last name of the household: ");
+    	String name = aScanner.nextLine();
+    	
+    	System.out.println("Enter the wage of the household: ");
+    	int wage = aScanner.nextInt();
+    	aScanner.nextLine();
+    	
+    	try {
+    		aQuery = "insert into potentialhousehold values('"+address+"', '"+occupation+"', '"+name+"', "+wage+");";
+    		aStatement.executeUpdate(aQuery, Statement.RETURN_GENERATED_KEYS);
+    	    aOutput = aStatement.getGeneratedKeys();
+    		
+    		if (!aOutput.next()) {
+    			System.err.println("Something went wrong creating the household");
+    			promptMainMenu();
+    		}
+	        
+	        aQuery = "select count(*) as total from adoptionapplication;";
+	        aOutput = aStatement.executeQuery(aQuery);
+	       
+	        if (!aOutput.next()) {
+	        	System.err.println("Something went wrong accepting the household");
+	        	promptMainMenu();
+	        }
+	        
+	        String count = String.valueOf(aOutput.getInt("total")+1);
+	        String aid;
+	        
+	        if (count.length() == 1) {
+	        	aid = "A000"+count;
+	        }
+	        else if (count.length() == 2) {
+	        	aid = "A00"+count;
+	        }
+	        else { // only supports to 3 digits
+	        	aid = "A0"+count;
+	        }
+	        
+	        java.util.Date date = new java.util.Date();
+			java.sql.Date sqlDate = new java.sql.Date(date.getTime());
+	        
+	        aQuery = "insert into adoptionapplication values('"+aid+"', DATE '"+sqlDate+"', "+aEID+", '"+address+"');";
+	        aStatement.executeUpdate(aQuery, Statement.RETURN_GENERATED_KEYS);
+    	    aOutput = aStatement.getGeneratedKeys();
+	        
+	        if (!aOutput.next()) {
+	        	System.err.println("Something went wrong creating the adoptionapplication");
+	        	promptMainMenu();
+	        }
+	        
+	        System.out.println("Please enter the 5 digit pid of the pet the household is adopting: ");
+	        String pid = aScanner.nextLine();
+	        
+	        aQuery = "insert into received values('"+aid+"', "+pid+");";
+	        aStatement.executeUpdate(aQuery, Statement.RETURN_GENERATED_KEYS);
+    	    aOutput = aStatement.getGeneratedKeys();
+	        
+	        if (!aOutput.next()) {
+	        	System.err.println("Something went wrong creating the application");
+	        	promptMainMenu();
+	        }
+	        
+	        aQuery = "select name from pet where pid = " + pid + ";";
+	        aOutput = aStatement.executeQuery(aQuery);
+	        
+	        if (aOutput.next()) {
+	        	String petName = aOutput.getString("name");
+	        	System.out.println(name + " has successfully placed an application for " + petName + "!");
+	        }
+	        else {
+	        	System.out.println("Something went wrong getting the pet name, but " + name + "'s application has successfully been placed");
+	        	promptMainMenu();
+	        }
+    	}
+    	catch (SQLException e) {
+    		System.err.println("Error occurred accepting the household");
+    		e.printStackTrace();
+    		closeDatabase();
+    	}
+    }
+    /**
+     * Registers a potential household
+     */
+    public static void promoteEmployee() {
+    	try {
+    		aQuery = "select eid from manager;";
+    		aOutput = aStatement.executeQuery(aQuery);
+    		boolean isManager = false;
+    		String eid = String.valueOf(aEID);
+    				
+    		while (aOutput.next()) {
+    			String meid = aOutput.getString("eid");
+    			if (eid.equals(meid)) {
+    				isManager = true;
+    				break;
+    			}
+    		}
+    		
+    		if (!isManager) {
+    			System.err.println("Only managers have the permissions to promote employees");
+    			promptMainMenu();
+    		}
+    		
+    		System.out.println("Enter the eid of the employee you wish to promote: ");
+    		String eeid = aScanner.nextLine();
+    		
+    		aQuery = "select name from employee where eid = "+eeid+";";
+    		aOutput = aStatement.executeQuery(aQuery);
+    		
+    		if (!aOutput.next()) {
+    			System.err.println("Could not locate this eid in the database.");
+    			promptMainMenu();
+    		}
+    		
+    		String eName = aOutput.getString("name");
+    		
+    		java.util.Date date = new java.util.Date();
+			java.sql.Date sqlDate = new java.sql.Date(date.getTime());
+    		
+    		aQuery = "insert into manager values("+eeid+", DATE '"+sqlDate+"');";
+    		aStatement.executeUpdate(aQuery, Statement.RETURN_GENERATED_KEYS);
+    	    aOutput = aStatement.getGeneratedKeys();
+    		
+    		if (aOutput.next()) {
+    			System.out.println("Successfully promoted "+eName+"!");
+    			promptMainMenu();
+    		}
+    	}
+    	catch (SQLException e) {
+    		System.err.println("Error occured promoting the employee");
+    		e.printStackTrace();
+    		closeDatabase();
+    	}
+    }
+    
     public static void closeDatabase() {
     	try {
-    		aConnection.close();
-    		aStatement.close();
-    		aOutput.close();
-    		preparePetInfo.close();
-    		System.out.println("database closed");
+    		if (aConnection != null) {
+    			aConnection.close();
+    		}
+    		if (aStatement != null) {
+    			aStatement.close();
+    		}
+    		if (aOutput != null) {
+    			aOutput.close();
+    		}
+    		if (preparePetInfo != null) {
+    			preparePetInfo.close();
+    		}
+    		System.out.println("Database closed");
+    		System.exit(aStatus);
     	}
     	catch (SQLException e) {
     		System.err.println("Could not close connections to database");
