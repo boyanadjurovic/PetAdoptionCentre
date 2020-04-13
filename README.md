@@ -1,2 +1,2 @@
 # PetAdoptionCentre
-* Database project for COMP 421 *
+Database project for COMP 421
